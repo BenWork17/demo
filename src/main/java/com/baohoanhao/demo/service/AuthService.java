@@ -6,6 +6,7 @@ import com.baohoanhao.demo.dto.request.RefreshTokenRequest;
 import com.baohoanhao.demo.dto.request.RegisterRequest;
 import com.baohoanhao.demo.dto.response.AuthResponse;
 import com.baohoanhao.demo.entity.User;
+import com.baohoanhao.demo.entity.Role;
 import com.baohoanhao.demo.exception.BadRequestException;
 import com.baohoanhao.demo.exception.ConflictException;
 import com.baohoanhao.demo.exception.UnauthorizedException;
@@ -40,7 +41,7 @@ public class AuthService {
     private final TokenStorageService tokenStorageService;
     private final JwtProperties jwtProperties;
 
-    private static final String DEFAULT_ROLE = "USER";
+    
 
     /**
      * Đăng ký user mới
@@ -67,6 +68,7 @@ public class AuthService {
                 .phone(request.getPhone())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .active(true)
+            .role(Role.USER)
                 .build();
 
         user = userRepository.save(user);
@@ -170,7 +172,7 @@ public class AuthService {
      */
     private AuthResponse generateAuthResponse(User user) {
         // 1. Generate tokens
-        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), DEFAULT_ROLE);
+        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name());
         String refreshToken = jwtService.generateRefreshToken(user.getId());
 
         // 2. Lưu refresh token vào Redis
@@ -191,7 +193,7 @@ public class AuthService {
                         .email(user.getEmail())
                         .phone(user.getPhone())
                         .fullName(user.getFullName())
-                        .role(DEFAULT_ROLE)
+                        .role(user.getRole().name())
                         .build())
                 .build();
     }

@@ -42,6 +42,11 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private Role role = Role.USER;
+
     // Auditing (Senior luôn cần biết bản ghi được tạo lúc nào)
     @CreationTimestamp
     private LocalDateTime createdAt;

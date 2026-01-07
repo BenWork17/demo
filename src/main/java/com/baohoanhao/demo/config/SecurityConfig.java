@@ -37,6 +37,7 @@ public class SecurityConfig {
     // Các endpoints công khai không cần authentication
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/**",
+            "/api/auth/oauth2/**",
             "/api/public/**",
             "/actuator/health",
             "/swagger-ui/**",
