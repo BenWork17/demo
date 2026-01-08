@@ -3,6 +3,7 @@ package com.baohoanhao.demo.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
  * InMemoryClientRegistrationRepository và bean này sẽ bị bỏ qua.
  */
 @Configuration
+@Profile("!oauth")
 public class OAuthFallbackConfig {
 
     @Bean

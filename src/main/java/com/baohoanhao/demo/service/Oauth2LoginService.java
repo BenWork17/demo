@@ -1,5 +1,6 @@
 package com.baohoanhao.demo.service;
 
+import com.baohoanhao.demo.config.JwtProperties;
 import com.baohoanhao.demo.dto.response.AuthResponse;
 import com.baohoanhao.demo.entity.Role;
 import com.baohoanhao.demo.entity.User;
@@ -8,9 +9,10 @@ import com.baohoanhao.demo.exception.UnauthorizedException;
 import com.baohoanhao.demo.repository.UserRepository;
 import com.baohoanhao.demo.security.JwtService;
 import com.baohoanhao.demo.security.TokenStorageService;
-import com.baohoanhao.demo.config.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -46,6 +48,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Profile("oauth")
+@ConditionalOnProperty(value = "app.oauth.enabled", havingValue = "true")
 public class Oauth2LoginService {
 
     private final ClientRegistrationRepository clientRegistrationRepository;

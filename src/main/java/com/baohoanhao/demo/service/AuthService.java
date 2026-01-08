@@ -19,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -163,6 +165,24 @@ public class AuthService {
     public void logoutAll(String userId) {
         tokenStorageService.revokeAllUserTokens(userId);
         log.info("User logged out from all devices: {}", userId);
+    }
+
+    /**
+     * Lấy thông tin user hiện tại (id, email, fullName, phone, role, authorities)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getCurrentUserProfile(String userId, Collection<?> authorities) {
+        User user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new UnauthorizedException("User không tồn tại"));
+
+        return Map.of(
+            "id", user.getId().toString(),
+            "email", user.getEmail(),
+            "fullName", user.getFullName(),
+            "phone", user.getPhone(),
+            "role", user.getRole().name(),
+            "authorities", authorities
+        );
     }
 
     // ==================== Private Methods ====================

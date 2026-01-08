@@ -126,10 +126,10 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Object>> getCurrentUser(Authentication authentication) {
-        return ResponseEntity.ok(ApiResponse.success("User info", 
-                java.util.Map.of(
-                        "userId", authentication.getName(),
-                        "authorities", authentication.getAuthorities()
-                )));
+        String userId = authentication.getName();
+        return ResponseEntity.ok(ApiResponse.success(
+            "User info",
+            authService.getCurrentUserProfile(userId, authentication.getAuthorities())
+        ));
     }
 }

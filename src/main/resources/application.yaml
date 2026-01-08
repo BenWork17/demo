@@ -42,6 +42,7 @@ app:
     full-name: ${APP_ADMIN_FULLNAME:Admin}
   oauth:
     enabled: false
+  frontend-url: ${APP_FRONTEND_URL}
 # JWT Configuration
 jwt:
   secret-key: ${JWT_SECRET:}
