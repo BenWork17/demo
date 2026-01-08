@@ -31,6 +31,31 @@ services:
       timeout: 5s
       retries: 5
 
+  app:
+    image: maven:3.11.4-jdk-21-slim
+    container_name: demo-app
+    working_dir: /workspace
+    command:
+      - bash
+      - -lc
+      - |
+        chmod +x mvnw
+        && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_OUTPUT_ANSI_ENABLED: ALWAYS
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    volumes:
+      - ./:/workspace:delegated
+      - m2_repo:/root/.m2
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
 volumes:
   mysql_data:
   redis_data:
+  m2_repo:

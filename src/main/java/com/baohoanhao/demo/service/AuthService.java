@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -175,14 +176,15 @@ public class AuthService {
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new UnauthorizedException("User không tồn tại"));
 
-        return Map.of(
-            "id", user.getId().toString(),
-            "email", user.getEmail(),
-            "fullName", user.getFullName(),
-            "phone", user.getPhone(),
-            "role", user.getRole().name(),
-            "authorities", authorities
-        );
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("id", user.getId().toString());
+        profile.put("email", user.getEmail());
+        profile.put("fullName", user.getFullName());
+        profile.put("phone", user.getPhone());
+        profile.put("role", user.getRole().name());
+        profile.put("authorities", authorities);
+
+        return profile;
     }
 
     // ==================== Private Methods ====================
