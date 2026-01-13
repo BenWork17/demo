@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-service:3306/demo_db"
+  SPRING_DATA_REDIS_HOST: "redis-service"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_PROFILES_ACTIVE: "dev,oauth"
+  SPRING_CONFIG_IMPORT: ""
+  APP_FRONTEND_URL: "http://localhost:5173"
+  APP_ADMIN_EMAIL: "admin@example.com"
+  APP_ADMIN_FULLNAME: "Admin"
+  GOOGLE_CLIENT_ID: "YOUR_GOOGLE_CLIENT_ID"
+  FACEBOOK_CLIENT_ID: "YOUR_FACEBOOK_CLIENT_ID"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+type: Opaque
+data:
+  # Các giá trị dưới đây phải được mã hóa Base64 trước khi điền vào
+  # Ví dụ: echo -n 'password' | base64
+  SPRING_DATASOURCE_USERNAME: cm9vdA== # user: root
+  SPRING_DATASOURCE_PASSWORD: YOUR_BASE64_PASSWORD
+  JWT_SECRET: YOUR_BASE64_JWT_SECRET
+  APP_ADMIN_PASSWORD: YOUR_BASE64_ADMIN_PASSWORD
+  GOOGLE_CLIENT_SECRET: YOUR_BASE64_GOOGLE_SECRET
+  FACEBOOK_CLIENT_SECRET: YOUR_BASE64_FACEBOOK_SECRET

@@ -41,7 +41,12 @@ public class SecurityConfig {
             "/api/public/**",
             "/actuator/health",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/favicon.ico",
+            "/static/**",
+            "/css/**",
+            "/js/**",
+            "/images/**"
     };
 
     @Bean

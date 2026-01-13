@@ -5,8 +5,8 @@ services:
     image: mysql:8.0.44-debian
     container_name: mysql-8
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-demo_db}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "3306:3306"
     volumes:
@@ -32,21 +32,22 @@ services:
       retries: 5
 
   app:
-    image: maven:3.11.4-jdk-21-slim
+    image: maven:3.9.9-eclipse-temurin-21
     container_name: demo-app
     working_dir: /workspace
-    command:
-      - bash
-      - -lc
-      - |
-        chmod +x mvnw
-        && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+    command: ["bash", "-lc", "chmod +x mvnw && ./mvnw spring-boot:run -Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE} -DskipTests"]
     ports:
       - "8080:8080"
     environment:
       SPRING_OUTPUT_ANSI_ENABLED: ALWAYS
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT}
+      APP_OAUTH_ENABLED: ${APP_OAUTH_ENABLED}
     volumes:
       - ./:/workspace:delegated
       - m2_repo:/root/.m2

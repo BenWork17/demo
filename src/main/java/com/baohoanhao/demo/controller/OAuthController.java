@@ -1,3 +1,4 @@
+
 package com.baohoanhao.demo.controller;
 
 import com.baohoanhao.demo.dto.response.ApiResponse;
@@ -51,21 +52,21 @@ public class OAuthController {
 
         // Build redirect to FE with tokens and basic user info
         UriComponentsBuilder targetBuilder = resolveRedirectUrl(state)
-            .map(UriComponentsBuilder::fromUriString)
-            .orElseGet(() -> UriComponentsBuilder.fromUriString(frontendUrl));
+                .map(UriComponentsBuilder::fromUriString)
+                .orElseGet(() -> UriComponentsBuilder.fromUriString(frontendUrl));
 
         String target = targetBuilder
-            .queryParam("accessToken", authResponse.getAccessToken())
-            .queryParam("refreshToken", authResponse.getRefreshToken())
-            .queryParam("tokenType", authResponse.getTokenType())
-            .queryParam("expiresIn", authResponse.getExpiresIn())
-            .queryParam("userId", authResponse.getUser().getId())
-            .queryParam("email", authResponse.getUser().getEmail())
-            .queryParam("fullName", authResponse.getUser().getFullName())
-            .queryParam("role", authResponse.getUser().getRole())
-            .build()
-            .encode(StandardCharsets.UTF_8)
-            .toUriString();
+                .queryParam("accessToken", authResponse.getAccessToken())
+                .queryParam("refreshToken", authResponse.getRefreshToken())
+                .queryParam("tokenType", authResponse.getTokenType())
+                .queryParam("expiresIn", authResponse.getExpiresIn())
+                .queryParam("userId", authResponse.getUser().getId())
+                .queryParam("email", authResponse.getUser().getEmail())
+                .queryParam("fullName", authResponse.getUser().getFullName())
+                .queryParam("role", authResponse.getUser().getRole())
+                .build()
+                .encode(StandardCharsets.UTF_8)
+                .toUriString();
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(target))
