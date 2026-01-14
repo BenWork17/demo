@@ -1,5 +1,6 @@
 package com.baohoanhao.demo.config;
 
+import com.baohoanhao.demo.security.CustomAuthenticationEntryPoint;
 import com.baohoanhao.demo.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -33,10 +34,13 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     // Các endpoints công khai không cần authentication
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/**",
+            "/api/auth/register",
+            "/api/auth/login",
+            "/api/auth/refresh",
             "/api/auth/oauth2/**",
             "/api/public/**",
             "/actuator/health",
@@ -74,7 +78,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 
-                // 5. Thêm JWT filter trước UsernamePasswordAuthenticationFilter
+                // 5. Custom AuthenticationEntryPoint - Trả về 401 thay vì 403
+                .exceptionHandling(exception -> 
+                        exception.authenticationEntryPoint(authenticationEntryPoint))
+                
+                // 6. Thêm JWT filter trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

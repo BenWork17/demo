@@ -173,7 +173,15 @@ public class AuthService {
      */
     @Transactional(readOnly = true)
     public Map<String, Object> getCurrentUserProfile(String userId, Collection<?> authorities) {
-        User user = userRepository.findById(UUID.fromString(userId))
+        UUID userUuid;
+        try {
+            userUuid = UUID.fromString(userId);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid UUID format for userId: {}", userId);
+            throw new UnauthorizedException("Định dạng User ID không hợp lệ");
+        }
+
+        User user = userRepository.findById(userUuid)
                 .orElseThrow(() -> new UnauthorizedException("User không tồn tại"));
 
         Map<String, Object> profile = new HashMap<>();

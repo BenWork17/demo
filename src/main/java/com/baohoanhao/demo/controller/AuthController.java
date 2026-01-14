@@ -5,6 +5,7 @@ import com.baohoanhao.demo.dto.request.RefreshTokenRequest;
 import com.baohoanhao.demo.dto.request.RegisterRequest;
 import com.baohoanhao.demo.dto.response.ApiResponse;
 import com.baohoanhao.demo.dto.response.AuthResponse;
+import com.baohoanhao.demo.exception.UnauthorizedException;
 import com.baohoanhao.demo.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -126,6 +127,9 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Object>> getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            throw new UnauthorizedException("Vui lòng đăng nhập để thực hiện thao tác này");
+        }
         String userId = authentication.getName();
         return ResponseEntity.ok(ApiResponse.success(
             "User info",
