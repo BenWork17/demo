@@ -35,7 +35,7 @@ services:
     image: maven:3.9.9-eclipse-temurin-21
     container_name: demo-app
     working_dir: /workspace
-    command: ["bash", "-lc", "chmod +x mvnw && ./mvnw spring-boot:run -Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE} -DskipTests"]
+    command: ["bash", "-lc", "chmod +x mvnw && ./mvnw clean package -U -Dmaven.test.skip=true && ./mvnw spring-boot:run -Dspring-boot.run.profiles=${SPRING_PROFILES_ACTIVE}"]
     ports:
       - "8080:8080"
     environment:

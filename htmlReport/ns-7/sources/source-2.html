@@ -1,0 +1,227 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JwtAuthenticationFilter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.security</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtAuthenticationFilter (com.baohoanhao.demo.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtAuthenticationFilter</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.security;
+&nbsp;
+&nbsp;import jakarta.servlet.FilterChain;
+&nbsp;import jakarta.servlet.ServletException;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.lang.NonNull;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.web.filter.OncePerRequestFilter;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * JWT Authentication Filter
+&nbsp; * 
+&nbsp; * Filter này chạy trước mọi request để:
+&nbsp; * 1. Extract JWT từ Authorization header
+&nbsp; * 2. Validate token
+&nbsp; * 3. Set Authentication vào SecurityContext
+&nbsp; */
+&nbsp;@Component
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;public class JwtAuthenticationFilter extends OncePerRequestFilter {
+&nbsp;
+&nbsp;    private final JwtService jwtService;
+&nbsp;    private final TokenStorageService tokenStorageService;
+&nbsp;
+&nbsp;    private static final String AUTHORIZATION_HEADER = &quot;Authorization&quot;;
+&nbsp;    private static final String BEARER_PREFIX = &quot;Bearer &quot;;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    protected void doFilterInternal(
+&nbsp;            @NonNull HttpServletRequest request,
+&nbsp;            @NonNull HttpServletResponse response,
+&nbsp;            @NonNull FilterChain filterChain
+&nbsp;    ) throws ServletException, IOException {
+&nbsp;        
+&nbsp;        // 1. Lấy Authorization header
+<b class="nc">&nbsp;        final String authHeader = request.getHeader(AUTHORIZATION_HEADER);</b>
+&nbsp;        
+&nbsp;        // 2. Kiểm tra có Bearer token không
+<b class="nc">&nbsp;        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {</b>
+<b class="nc">&nbsp;            filterChain.doFilter(request, response);</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // 3. Extract token
+<b class="nc">&nbsp;        final String jwt = authHeader.substring(BEARER_PREFIX.length());</b>
+&nbsp;        
+&nbsp;        try {
+&nbsp;            // 4. Validate token
+<b class="nc">&nbsp;            if (!jwtService.isTokenValid(jwt)) {</b>
+<b class="nc">&nbsp;                log.debug(&quot;Invalid JWT token&quot;);</b>
+<b class="nc">&nbsp;                filterChain.doFilter(request, response);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;
+&nbsp;            // 5. Kiểm tra token type phải là &quot;access&quot;
+<b class="nc">&nbsp;            String tokenType = jwtService.extractTokenType(jwt);</b>
+<b class="nc">&nbsp;            if (!&quot;access&quot;.equals(tokenType)) {</b>
+<b class="nc">&nbsp;                log.debug(&quot;Not an access token&quot;);</b>
+<b class="nc">&nbsp;                filterChain.doFilter(request, response);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;
+&nbsp;            // 6. Kiểm tra token có bị blacklist không
+<b class="nc">&nbsp;            if (tokenStorageService.isTokenBlacklisted(jwt)) {</b>
+<b class="nc">&nbsp;                log.debug(&quot;Token is blacklisted&quot;);</b>
+<b class="nc">&nbsp;                filterChain.doFilter(request, response);</b>
+&nbsp;                return;
+&nbsp;            }
+&nbsp;
+&nbsp;            // 7. Nếu chưa có Authentication trong context
+<b class="nc">&nbsp;            if (SecurityContextHolder.getContext().getAuthentication() == null) {</b>
+<b class="nc">&nbsp;                String userId = jwtService.extractUserId(jwt);</b>
+<b class="nc">&nbsp;                String email = jwtService.extractEmail(jwt);</b>
+<b class="nc">&nbsp;                String role = jwtService.extractRole(jwt);</b>
+&nbsp;
+&nbsp;                // 8. Tạo Authentication với role
+<b class="nc">&nbsp;                List&lt;SimpleGrantedAuthority&gt; authorities = List.of(</b>
+&nbsp;                        new SimpleGrantedAuthority(&quot;ROLE_&quot; + role)
+&nbsp;                );
+&nbsp;
+<b class="nc">&nbsp;                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(</b>
+&nbsp;                        userId,  // Principal = userId
+&nbsp;                        null,    // Credentials = null (đã validate bằng JWT)
+&nbsp;                        authorities
+&nbsp;                );
+&nbsp;
+<b class="nc">&nbsp;                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</b>
+&nbsp;                
+&nbsp;                // 9. Set vào SecurityContext
+<b class="nc">&nbsp;                SecurityContextHolder.getContext().setAuthentication(authToken);</b>
+&nbsp;                
+<b class="nc">&nbsp;                log.debug(&quot;Authenticated user: {} with role: {}&quot;, email, role);</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;Cannot set user authentication: {}&quot;, e.getMessage());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        filterChain.doFilter(request, response);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

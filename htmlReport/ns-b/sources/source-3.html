@@ -1,0 +1,93 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegisterRequest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.dto.request</a>
+</div>
+
+<h1>Coverage Summary for Class: RegisterRequest (com.baohoanhao.demo.dto.request)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RegisterRequest</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;// RegisterRequest.java
+&nbsp;package com.baohoanhao.demo.dto.request;
+&nbsp;
+&nbsp;import com.baohoanhao.demo.validation.StrongPassword;
+&nbsp;import jakarta.validation.constraints.Email;
+&nbsp;import jakarta.validation.constraints.NotBlank;
+&nbsp;import lombok.Data;
+&nbsp;
+&nbsp;@Data
+&nbsp;public class RegisterRequest {
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;Họ tên không được để trống&quot;)
+&nbsp;    private String fullName;
+&nbsp;
+&nbsp;    // Có thể null nếu user đăng ký bằng SĐT, nhưng ta sẽ validate logic ở Service
+&nbsp;    @Email(message = &quot;Email không hợp lệ&quot;)
+&nbsp;    private String email;
+&nbsp;
+&nbsp;    // Validate định dạng số điện thoại (VN)
+&nbsp;    // @Pattern(regexp = &quot;(84|0[3|5|7|8|9])+([0-9]{8})&quot;, message = &quot;Số điện thoại không hợp lệ&quot;)
+&nbsp;    private String phone;
+&nbsp;
+&nbsp;    @StrongPassword // Sử dụng Annotation xịn sò vừa viết
+&nbsp;    private String password;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

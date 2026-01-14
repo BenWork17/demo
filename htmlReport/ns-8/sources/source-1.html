@@ -1,0 +1,346 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthService (com.baohoanhao.demo.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (28/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (78/78)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.service;
+&nbsp;
+&nbsp;import com.baohoanhao.demo.config.JwtProperties;
+&nbsp;import com.baohoanhao.demo.dto.request.LoginRequest;
+&nbsp;import com.baohoanhao.demo.dto.request.RefreshTokenRequest;
+&nbsp;import com.baohoanhao.demo.dto.request.RegisterRequest;
+&nbsp;import com.baohoanhao.demo.dto.response.AuthResponse;
+&nbsp;import com.baohoanhao.demo.entity.User;
+&nbsp;import com.baohoanhao.demo.entity.Role;
+&nbsp;import com.baohoanhao.demo.exception.BadRequestException;
+&nbsp;import com.baohoanhao.demo.exception.ConflictException;
+&nbsp;import com.baohoanhao.demo.exception.UnauthorizedException;
+&nbsp;import com.baohoanhao.demo.repository.UserRepository;
+&nbsp;import com.baohoanhao.demo.security.JwtService;
+&nbsp;import com.baohoanhao.demo.security.TokenStorageService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;/**
+&nbsp; * Authentication Service
+&nbsp; * 
+&nbsp; * Xử lý:
+&nbsp; * - Đăng ký user mới
+&nbsp; * - Đăng nhập và phát hành JWT tokens
+&nbsp; * - Refresh token
+&nbsp; * - Logout (revoke tokens)
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class AuthService {
+&nbsp;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;    private final JwtService jwtService;
+&nbsp;    private final TokenStorageService tokenStorageService;
+&nbsp;    private final JwtProperties jwtProperties;
+&nbsp;
+&nbsp;    
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng ký user mới
+&nbsp;     */
+&nbsp;    @Transactional
+&nbsp;    public AuthResponse register(RegisterRequest request) {
+&nbsp;        // 1. Validate: cần ít nhất email hoặc phone
+<b class="fc">&nbsp;        if (request.getEmail() == null &amp;&amp; request.getPhone() == null) {</b>
+<b class="fc">&nbsp;            throw new BadRequestException(&quot;Cần cung cấp Email hoặc Số điện thoại&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 2. Kiểm tra trùng lặp
+<b class="fc">&nbsp;        if (request.getEmail() != null &amp;&amp; userRepository.existsByEmail(request.getEmail())) {</b>
+<b class="fc">&nbsp;            throw new ConflictException(&quot;Email&quot;, &quot;email&quot;, request.getEmail());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (request.getPhone() != null &amp;&amp; userRepository.existsByPhone(request.getPhone())) {</b>
+<b class="fc">&nbsp;            throw new ConflictException(&quot;Số điện thoại&quot;, &quot;phone&quot;, request.getPhone());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 3. Tạo user mới
+<b class="fc">&nbsp;        User user = User.builder()</b>
+<b class="fc">&nbsp;                .fullName(request.getFullName())</b>
+<b class="fc">&nbsp;                .email(request.getEmail())</b>
+<b class="fc">&nbsp;                .phone(request.getPhone())</b>
+<b class="fc">&nbsp;                .passwordHash(passwordEncoder.encode(request.getPassword()))</b>
+<b class="fc">&nbsp;                .active(true)</b>
+<b class="fc">&nbsp;            .role(Role.USER)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        user = userRepository.save(user);</b>
+<b class="fc">&nbsp;        log.info(&quot;User registered: {}&quot;, user.getEmail() != null ? user.getEmail() : user.getPhone());</b>
+&nbsp;
+&nbsp;        // 4. Generate tokens và trả về
+<b class="fc">&nbsp;        return generateAuthResponse(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng nhập
+&nbsp;     */
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public AuthResponse login(LoginRequest request) {
+&nbsp;        // 1. Tìm user bằng email hoặc phone
+<b class="fc">&nbsp;        User user = userRepository.findByIdentifier(request.getIdentifier())</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new UnauthorizedException(&quot;Tài khoản hoặc mật khẩu không đúng&quot;));</b>
+&nbsp;
+&nbsp;        // 2. Kiểm tra tài khoản active
+<b class="fc">&nbsp;        if (!user.isActive()) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Tài khoản đã bị vô hiệu hóa&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 3. Verify password
+<b class="fc">&nbsp;        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Tài khoản hoặc mật khẩu không đúng&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;User logged in: {}&quot;, request.getIdentifier());</b>
+&nbsp;
+&nbsp;        // 4. Generate tokens
+<b class="fc">&nbsp;        return generateAuthResponse(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Refresh access token
+&nbsp;     */
+&nbsp;    public AuthResponse refreshToken(RefreshTokenRequest request) {
+<b class="fc">&nbsp;        String refreshToken = request.getRefreshToken();</b>
+&nbsp;
+&nbsp;        // 1. Validate refresh token
+<b class="fc">&nbsp;        if (!jwtService.isTokenValid(refreshToken)) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Refresh token không hợp lệ&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 2. Kiểm tra token type
+<b class="fc">&nbsp;        if (!&quot;refresh&quot;.equals(jwtService.extractTokenType(refreshToken))) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Token không phải refresh token&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 3. Extract user ID
+<b class="fc">&nbsp;        String userId = jwtService.extractUserId(refreshToken);</b>
+&nbsp;
+&nbsp;        // 4. Kiểm tra refresh token có trong Redis không (chống token bị đánh cắp)
+<b class="fc">&nbsp;        String storedToken = tokenStorageService.getRefreshToken(userId);</b>
+<b class="pc">&nbsp;        if (storedToken == null || !storedToken.equals(refreshToken)) {</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Refresh token đã bị thu hồi&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 5. Tìm user
+<b class="fc">&nbsp;        User user = userRepository.findById(UUID.fromString(userId))</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new UnauthorizedException(&quot;User không tồn tại&quot;));</b>
+&nbsp;
+&nbsp;        // 6. Xóa refresh token cũ
+<b class="fc">&nbsp;        tokenStorageService.deleteRefreshToken(userId);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Token refreshed for user: {}&quot;, user.getId());</b>
+&nbsp;
+&nbsp;        // 7. Generate tokens mới
+<b class="fc">&nbsp;        return generateAuthResponse(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Logout - Revoke tokens
+&nbsp;     */
+&nbsp;    public void logout(String accessToken, String userId) {
+&nbsp;        // 1. Blacklist access token (để nó không dùng được nữa dù chưa hết hạn)
+<b class="pc">&nbsp;        if (accessToken != null &amp;&amp; jwtService.isTokenValid(accessToken)) {</b>
+<b class="fc">&nbsp;            long ttl = jwtService.getTimeToLive(accessToken);</b>
+<b class="fc">&nbsp;            tokenStorageService.blacklistToken(accessToken, ttl);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // 2. Xóa refresh token
+<b class="fc">&nbsp;        tokenStorageService.deleteRefreshToken(userId);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;User logged out: {}&quot;, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Logout tất cả devices
+&nbsp;     */
+&nbsp;    public void logoutAll(String userId) {
+<b class="fc">&nbsp;        tokenStorageService.revokeAllUserTokens(userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;User logged out from all devices: {}&quot;, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Lấy thông tin user hiện tại (id, email, fullName, phone, role, authorities)
+&nbsp;     */
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public Map&lt;String, Object&gt; getCurrentUserProfile(String userId, Collection&lt;?&gt; authorities) {
+&nbsp;        UUID userUuid;
+&nbsp;        try {
+<b class="fc">&nbsp;            userUuid = UUID.fromString(userId);</b>
+&nbsp;        } catch (IllegalArgumentException e) {
+<b class="fc">&nbsp;            log.error(&quot;Invalid UUID format for userId: {}&quot;, userId);</b>
+<b class="fc">&nbsp;            throw new UnauthorizedException(&quot;Định dạng User ID không hợp lệ&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User user = userRepository.findById(userUuid)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new UnauthorizedException(&quot;User không tồn tại&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; profile = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        profile.put(&quot;id&quot;, user.getId().toString());</b>
+<b class="fc">&nbsp;        profile.put(&quot;email&quot;, user.getEmail());</b>
+<b class="fc">&nbsp;        profile.put(&quot;fullName&quot;, user.getFullName());</b>
+<b class="fc">&nbsp;        profile.put(&quot;phone&quot;, user.getPhone());</b>
+<b class="fc">&nbsp;        profile.put(&quot;role&quot;, user.getRole().name());</b>
+<b class="fc">&nbsp;        profile.put(&quot;authorities&quot;, authorities);</b>
+&nbsp;
+<b class="fc">&nbsp;        return profile;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ==================== Private Methods ====================
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Generate AuthResponse với access và refresh tokens
+&nbsp;     */
+&nbsp;    private AuthResponse generateAuthResponse(User user) {
+&nbsp;        // 1. Generate tokens
+<b class="fc">&nbsp;        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name());</b>
+<b class="fc">&nbsp;        String refreshToken = jwtService.generateRefreshToken(user.getId());</b>
+&nbsp;
+&nbsp;        // 2. Lưu refresh token vào Redis
+<b class="fc">&nbsp;        tokenStorageService.storeRefreshToken(</b>
+<b class="fc">&nbsp;                user.getId().toString(),</b>
+&nbsp;                refreshToken,
+<b class="fc">&nbsp;                jwtProperties.getRefreshTokenExpiration()</b>
+&nbsp;        );
+&nbsp;
+&nbsp;        // 3. Build response
+<b class="fc">&nbsp;        return AuthResponse.builder()</b>
+<b class="fc">&nbsp;                .accessToken(accessToken)</b>
+<b class="fc">&nbsp;                .refreshToken(refreshToken)</b>
+<b class="fc">&nbsp;                .tokenType(&quot;Bearer&quot;)</b>
+<b class="fc">&nbsp;                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000) // Convert to seconds</b>
+<b class="fc">&nbsp;                .user(AuthResponse.UserInfo.builder()</b>
+<b class="fc">&nbsp;                        .id(user.getId().toString())</b>
+<b class="fc">&nbsp;                        .email(user.getEmail())</b>
+<b class="fc">&nbsp;                        .phone(user.getPhone())</b>
+<b class="fc">&nbsp;                        .fullName(user.getFullName())</b>
+<b class="fc">&nbsp;                        .role(user.getRole().name())</b>
+<b class="fc">&nbsp;                        .build())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

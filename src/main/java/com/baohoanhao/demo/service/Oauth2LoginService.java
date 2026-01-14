@@ -48,8 +48,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Profile("oauth")
-@ConditionalOnProperty(value = "app.oauth.enabled", havingValue = "true")
 public class Oauth2LoginService {
 
     private final ClientRegistrationRepository clientRegistrationRepository;

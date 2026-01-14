@@ -1,0 +1,112 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthResponse</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.dto.response</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthResponse (com.baohoanhao.demo.dto.response)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">AuthResponse$UserInfo</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.dto.response;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonInclude;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Builder;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;
+&nbsp;/**
+&nbsp; * Auth Response - Response cho các API authentication
+&nbsp; * 
+&nbsp; * Chứa:
+&nbsp; * - Access Token: ngắn hạn, dùng cho API calls
+&nbsp; * - Refresh Token: dài hạn, dùng để lấy access token mới
+&nbsp; * - User info cơ bản
+&nbsp; */
+&nbsp;@Data
+&nbsp;@Builder
+&nbsp;@NoArgsConstructor
+&nbsp;@AllArgsConstructor
+&nbsp;@JsonInclude(JsonInclude.Include.NON_NULL)
+&nbsp;public class AuthResponse {
+&nbsp;    
+&nbsp;    private String accessToken;
+&nbsp;    private String refreshToken;
+&nbsp;    private String tokenType;
+&nbsp;    private Long expiresIn;  // seconds
+&nbsp;    private UserInfo user;
+&nbsp;
+&nbsp;    @Data
+&nbsp;    @Builder
+&nbsp;    @NoArgsConstructor
+&nbsp;    @AllArgsConstructor
+&nbsp;    public static class UserInfo {
+&nbsp;        private String id;
+&nbsp;        private String email;
+&nbsp;        private String phone;
+&nbsp;        private String fullName;
+&nbsp;        private String role;
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

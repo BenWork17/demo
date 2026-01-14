@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TokenStorageService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.security</a>
+</div>
+
+<h1>Coverage Summary for Class: TokenStorageService (com.baohoanhao.demo.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TokenStorageService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    12.5%
+  </span>
+  <span class="absValue">
+    (1/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5.6%
+  </span>
+  <span class="absValue">
+    (1/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.security;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.data.redis.core.RedisTemplate;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;/**
+&nbsp; * Token Storage Service - Quản lý tokens trong Redis
+&nbsp; * 
+&nbsp; * Chức năng:
+&nbsp; * - Lưu refresh token để tracking và revoke
+&nbsp; * - Blacklist access token khi logout
+&nbsp; * - Kiểm tra token có bị revoke không
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class TokenStorageService {
+&nbsp;
+&nbsp;    private final RedisTemplate&lt;String, Object&gt; redisTemplate;
+&nbsp;
+&nbsp;    // Redis key prefixes
+&nbsp;    private static final String REFRESH_TOKEN_PREFIX = &quot;refresh_token:&quot;;
+&nbsp;    private static final String BLACKLIST_PREFIX = &quot;blacklist:&quot;;
+&nbsp;    private static final String USER_TOKENS_PREFIX = &quot;user_tokens:&quot;;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Lưu refresh token vào Redis
+&nbsp;     * Key pattern: refresh_token:{userId}:{tokenHash}
+&nbsp;     */
+&nbsp;    public void storeRefreshToken(String userId, String refreshToken, long ttlMillis) {
+<b class="nc">&nbsp;        String key = REFRESH_TOKEN_PREFIX + userId;</b>
+<b class="nc">&nbsp;        redisTemplate.opsForValue().set(key, refreshToken, ttlMillis, TimeUnit.MILLISECONDS);</b>
+<b class="nc">&nbsp;        log.debug(&quot;Stored refresh token for user: {}&quot;, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Lấy refresh token của user
+&nbsp;     */
+&nbsp;    public String getRefreshToken(String userId) {
+<b class="nc">&nbsp;        String key = REFRESH_TOKEN_PREFIX + userId;</b>
+<b class="nc">&nbsp;        Object token = redisTemplate.opsForValue().get(key);</b>
+<b class="nc">&nbsp;        return token != null ? token.toString() : null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Xóa refresh token (khi logout hoặc refresh)
+&nbsp;     */
+&nbsp;    public void deleteRefreshToken(String userId) {
+<b class="nc">&nbsp;        String key = REFRESH_TOKEN_PREFIX + userId;</b>
+<b class="nc">&nbsp;        redisTemplate.delete(key);</b>
+<b class="nc">&nbsp;        log.debug(&quot;Deleted refresh token for user: {}&quot;, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Blacklist access token khi logout
+&nbsp;     * Token sẽ tự động bị xóa khi hết hạn (TTL)
+&nbsp;     */
+&nbsp;    public void blacklistToken(String token, long ttlMillis) {
+<b class="nc">&nbsp;        String key = BLACKLIST_PREFIX + hashToken(token);</b>
+<b class="nc">&nbsp;        redisTemplate.opsForValue().set(key, &quot;revoked&quot;, ttlMillis, TimeUnit.MILLISECONDS);</b>
+<b class="nc">&nbsp;        log.debug(&quot;Blacklisted token&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Kiểm tra token có bị blacklist không
+&nbsp;     */
+&nbsp;    public boolean isTokenBlacklisted(String token) {
+<b class="nc">&nbsp;        String key = BLACKLIST_PREFIX + hashToken(token);</b>
+<b class="nc">&nbsp;        return Boolean.TRUE.equals(redisTemplate.hasKey(key));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Revoke tất cả tokens của user (force logout everywhere)
+&nbsp;     */
+&nbsp;    public void revokeAllUserTokens(String userId) {
+&nbsp;        // Xóa refresh token
+<b class="nc">&nbsp;        deleteRefreshToken(userId);</b>
+&nbsp;        
+&nbsp;        // Có thể thêm logic blacklist các access tokens đang active
+&nbsp;        // Tuy nhiên cách tốt hơn là dùng token version trong DB
+<b class="nc">&nbsp;        log.info(&quot;Revoked all tokens for user: {}&quot;, userId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Hash token để làm key (không lưu token raw vào key)
+&nbsp;     */
+&nbsp;    private String hashToken(String token) {
+&nbsp;        // Lấy 32 ký tự cuối của token làm identifier
+&nbsp;        // Đủ unique và không expose toàn bộ token
+<b class="nc">&nbsp;        return token.length() &gt; 32 ? token.substring(token.length() - 32) : token;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

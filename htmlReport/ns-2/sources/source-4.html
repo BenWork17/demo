@@ -1,0 +1,128 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OAuthFallbackConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: OAuthFallbackConfig (com.baohoanhao.demo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OAuthFallbackConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.config;
+&nbsp;
+&nbsp;import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.context.annotation.Profile;
+&nbsp;import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+&nbsp;
+&nbsp;/**
+&nbsp; * Cung cấp ClientRegistrationRepository rỗng khi chưa cấu hình OAuth2.
+&nbsp; * Khi bật profile &quot;oauth&quot; với đầy đủ client-id/secret, Spring Boot sẽ tự tạo
+&nbsp; * InMemoryClientRegistrationRepository và bean này sẽ bị bỏ qua.
+&nbsp; */
+&nbsp;@Configuration
+&nbsp;@Profile(&quot;!oauth&quot;)
+<b class="nc">&nbsp;public class OAuthFallbackConfig {</b>
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    @ConditionalOnMissingBean(ClientRegistrationRepository.class)
+&nbsp;    ClientRegistrationRepository noopClientRegistrationRepository() {
+&nbsp;        // Trả về repository rỗng - không có provider nào được đăng ký
+<b class="nc">&nbsp;        return registrationId -&gt; null;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,255 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthController (com.baohoanhao.demo.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.controller;
+&nbsp;
+&nbsp;import com.baohoanhao.demo.dto.request.LoginRequest;
+&nbsp;import com.baohoanhao.demo.dto.request.RefreshTokenRequest;
+&nbsp;import com.baohoanhao.demo.dto.request.RegisterRequest;
+&nbsp;import com.baohoanhao.demo.dto.response.ApiResponse;
+&nbsp;import com.baohoanhao.demo.dto.response.AuthResponse;
+&nbsp;import com.baohoanhao.demo.exception.UnauthorizedException;
+&nbsp;import com.baohoanhao.demo.service.AuthService;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * Authentication Controller
+&nbsp; * 
+&nbsp; * REST API Endpoints:
+&nbsp; * - POST /api/auth/register  - Đăng ký tài khoản mới
+&nbsp; * - POST /api/auth/login     - Đăng nhập
+&nbsp; * - POST /api/auth/refresh   - Refresh access token
+&nbsp; * - POST /api/auth/logout    - Đăng xuất (cần authentication)
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/auth&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class AuthController {
+&nbsp;
+&nbsp;    private final AuthService authService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng ký tài khoản mới
+&nbsp;     * 
+&nbsp;     * POST /api/auth/register
+&nbsp;     * Body: { fullName, email?, phone?, password }
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/register&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;AuthResponse&gt;&gt; register(
+&nbsp;            @Valid @RequestBody RegisterRequest request) {
+&nbsp;        
+<b class="nc">&nbsp;        AuthResponse authResponse = authService.register(request);</b>
+&nbsp;        
+<b class="nc">&nbsp;        return ResponseEntity</b>
+<b class="nc">&nbsp;                .status(HttpStatus.CREATED)</b>
+<b class="nc">&nbsp;                .body(ApiResponse.success(&quot;Đăng ký thành công&quot;, authResponse));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng nhập
+&nbsp;     * 
+&nbsp;     * POST /api/auth/login
+&nbsp;     * Body: { identifier (email/phone), password }
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/login&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;AuthResponse&gt;&gt; login(
+&nbsp;            @Valid @RequestBody LoginRequest request) {
+&nbsp;        
+<b class="nc">&nbsp;        AuthResponse authResponse = authService.login(request);</b>
+&nbsp;        
+<b class="nc">&nbsp;        return ResponseEntity.ok(ApiResponse.success(&quot;Đăng nhập thành công&quot;, authResponse));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Refresh access token
+&nbsp;     * 
+&nbsp;     * POST /api/auth/refresh
+&nbsp;     * Body: { refreshToken }
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/refresh&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;AuthResponse&gt;&gt; refresh(
+&nbsp;            @Valid @RequestBody RefreshTokenRequest request) {
+&nbsp;        
+<b class="nc">&nbsp;        AuthResponse authResponse = authService.refreshToken(request);</b>
+&nbsp;        
+<b class="nc">&nbsp;        return ResponseEntity.ok(ApiResponse.success(&quot;Token đã được làm mới&quot;, authResponse));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng xuất
+&nbsp;     * 
+&nbsp;     * POST /api/auth/logout
+&nbsp;     * Header: Authorization: Bearer {accessToken}
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/logout&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; logout(
+&nbsp;            HttpServletRequest request,
+&nbsp;            Authentication authentication) {
+&nbsp;        
+&nbsp;        // Lấy token từ header
+<b class="nc">&nbsp;        String authHeader = request.getHeader(&quot;Authorization&quot;);</b>
+<b class="nc">&nbsp;        String accessToken = null;</b>
+<b class="nc">&nbsp;        if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</b>
+<b class="nc">&nbsp;            accessToken = authHeader.substring(7);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Lấy userId từ authentication (được set bởi JwtAuthenticationFilter)
+<b class="nc">&nbsp;        String userId = authentication != null ? authentication.getName() : null;</b>
+&nbsp;
+<b class="nc">&nbsp;        if (userId != null) {</b>
+<b class="nc">&nbsp;            authService.logout(accessToken, userId);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return ResponseEntity.ok(ApiResponse.success(&quot;Đăng xuất thành công&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Đăng xuất tất cả thiết bị
+&nbsp;     * 
+&nbsp;     * POST /api/auth/logout-all
+&nbsp;     * Header: Authorization: Bearer {accessToken}
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/logout-all&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;Void&gt;&gt; logoutAll(Authentication authentication) {
+<b class="nc">&nbsp;        String userId = authentication.getName();</b>
+<b class="nc">&nbsp;        authService.logoutAll(userId);</b>
+&nbsp;        
+<b class="nc">&nbsp;        return ResponseEntity.ok(ApiResponse.success(&quot;Đã đăng xuất khỏi tất cả thiết bị&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Lấy thông tin user hiện tại (test endpoint - cần auth)
+&nbsp;     * 
+&nbsp;     * GET /api/auth/me
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/me&quot;)
+&nbsp;    public ResponseEntity&lt;ApiResponse&lt;Object&gt;&gt; getCurrentUser(Authentication authentication) {
+<b class="nc">&nbsp;        if (authentication == null) {</b>
+<b class="nc">&nbsp;            throw new UnauthorizedException(&quot;Vui lòng đăng nhập để thực hiện thao tác này&quot;);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        String userId = authentication.getName();</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok(ApiResponse.success(</b>
+&nbsp;            &quot;User info&quot;,
+<b class="nc">&nbsp;            authService.getCurrentUserProfile(userId, authentication.getAuthorities())</b>
+&nbsp;        ));
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

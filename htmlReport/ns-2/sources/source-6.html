@@ -1,0 +1,221 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SecurityConfig</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.baohoanhao.demo.config</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityConfig (com.baohoanhao.demo.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/24)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.baohoanhao.demo.config;
+&nbsp;
+&nbsp;import com.baohoanhao.demo.security.CustomAuthenticationEntryPoint;
+&nbsp;import com.baohoanhao.demo.security.JwtAuthenticationFilter;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.http.HttpMethod;
+&nbsp;import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+&nbsp;import org.springframework.security.config.http.SessionCreationPolicy;
+&nbsp;import org.springframework.security.web.SecurityFilterChain;
+&nbsp;import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+&nbsp;import org.springframework.web.cors.CorsConfiguration;
+&nbsp;import org.springframework.web.cors.CorsConfigurationSource;
+&nbsp;import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Security Configuration
+&nbsp; * 
+&nbsp; * JWT-based stateless authentication:
+&nbsp; * - Không dùng session (STATELESS)
+&nbsp; * - Tắt CSRF (vì không có session)
+&nbsp; * - JWT filter validate token trước mỗi request
+&nbsp; */
+&nbsp;@Configuration
+&nbsp;@EnableWebSecurity
+&nbsp;@EnableMethodSecurity  // Cho phép dùng @PreAuthorize trên method
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class SecurityConfig {
+&nbsp;
+&nbsp;    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+&nbsp;    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+&nbsp;
+&nbsp;    // Các endpoints công khai không cần authentication
+<b class="nc">&nbsp;    private static final String[] PUBLIC_ENDPOINTS = {</b>
+&nbsp;            &quot;/api/auth/register&quot;,
+&nbsp;            &quot;/api/auth/login&quot;,
+&nbsp;            &quot;/api/auth/refresh&quot;,
+&nbsp;            &quot;/api/auth/oauth2/**&quot;,
+&nbsp;            &quot;/api/public/**&quot;,
+&nbsp;            &quot;/actuator/health&quot;,
+&nbsp;            &quot;/swagger-ui/**&quot;,
+&nbsp;            &quot;/v3/api-docs/**&quot;,
+&nbsp;            &quot;/favicon.ico&quot;,
+&nbsp;            &quot;/static/**&quot;,
+&nbsp;            &quot;/css/**&quot;,
+&nbsp;            &quot;/js/**&quot;,
+&nbsp;            &quot;/images/**&quot;
+&nbsp;    };
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<b class="nc">&nbsp;        http</b>
+&nbsp;                // 1. Tắt CSRF - Không cần vì dùng JWT (stateless)
+<b class="nc">&nbsp;                .csrf(AbstractHttpConfigurer::disable)</b>
+&nbsp;                
+&nbsp;                // 2. Bật CORS
+<b class="nc">&nbsp;                .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</b>
+&nbsp;                
+&nbsp;                // 3. Session Management - STATELESS cho JWT
+<b class="nc">&nbsp;                .sessionManagement(session -&gt; </b>
+<b class="nc">&nbsp;                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</b>
+&nbsp;                
+&nbsp;                // 4. Cấu hình Authorization
+<b class="nc">&nbsp;                .authorizeHttpRequests(auth -&gt; auth</b>
+&nbsp;                        // Cho phép OPTIONS (CORS preflight)
+<b class="nc">&nbsp;                        .requestMatchers(HttpMethod.OPTIONS, &quot;/**&quot;).permitAll()</b>
+&nbsp;                        
+&nbsp;                        // Public endpoints
+<b class="nc">&nbsp;                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()</b>
+&nbsp;                        
+&nbsp;                        // Tất cả request khác cần authentication
+<b class="nc">&nbsp;                        .anyRequest().authenticated()</b>
+&nbsp;                )
+&nbsp;                
+&nbsp;                // 5. Custom AuthenticationEntryPoint - Trả về 401 thay vì 403
+<b class="nc">&nbsp;                .exceptionHandling(exception -&gt; </b>
+<b class="nc">&nbsp;                        exception.authenticationEntryPoint(authenticationEntryPoint))</b>
+&nbsp;                
+&nbsp;                // 6. Thêm JWT filter trước UsernamePasswordAuthenticationFilter
+<b class="nc">&nbsp;                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);</b>
+&nbsp;
+<b class="nc">&nbsp;        return http.build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public CorsConfigurationSource corsConfigurationSource() {
+<b class="nc">&nbsp;        CorsConfiguration config = new CorsConfiguration();</b>
+&nbsp;        
+&nbsp;        // Cho phép frontend origins (production nên config cụ thể)
+<b class="nc">&nbsp;        config.setAllowedOriginPatterns(List.of(&quot;*&quot;));</b>
+&nbsp;        
+&nbsp;        // Các HTTP methods được phép
+<b class="nc">&nbsp;        config.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;, &quot;OPTIONS&quot;));</b>
+&nbsp;        
+&nbsp;        // Các headers được phép
+<b class="nc">&nbsp;        config.setAllowedHeaders(List.of(&quot;*&quot;));</b>
+&nbsp;        
+&nbsp;        // Headers expose cho frontend đọc
+<b class="nc">&nbsp;        config.setExposedHeaders(List.of(&quot;Authorization&quot;, &quot;Content-Type&quot;, &quot;X-Total-Count&quot;));</b>
+&nbsp;        
+&nbsp;        // Cho phép gửi credentials (cookies, authorization headers)
+<b class="nc">&nbsp;        config.setAllowCredentials(true);</b>
+&nbsp;        
+&nbsp;        // Cache preflight response
+<b class="nc">&nbsp;        config.setMaxAge(3600L);</b>
+&nbsp;
+<b class="nc">&nbsp;        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</b>
+<b class="nc">&nbsp;        source.registerCorsConfiguration(&quot;/**&quot;, config);</b>
+<b class="nc">&nbsp;        return source;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-01-14 14:56</div>
+</div>
+</body>
+</html>

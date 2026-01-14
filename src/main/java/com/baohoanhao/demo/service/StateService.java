@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Profile("oauth")
-@ConditionalOnProperty(value = "app.oauth.enabled", havingValue = "true")
 public class StateService {
     
     private final RedisTemplate<String, Object> redisTemplate;
