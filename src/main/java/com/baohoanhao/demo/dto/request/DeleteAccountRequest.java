@@ -5,8 +5,6 @@ import lombok.Data;
 
 @Data
 public class DeleteAccountRequest {
-    @NotBlank(message = "Vui lòng nhập mật khẩu để xác nhận")
+    @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
-
-    private String reason;
 }

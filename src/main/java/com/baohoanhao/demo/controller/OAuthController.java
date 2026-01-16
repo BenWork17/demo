@@ -57,7 +57,10 @@ public class OAuthController {
 
         String target = targetBuilder
                 .queryParam("accessToken", authResponse.getAccessToken())
+                .queryParam("access_token", authResponse.getAccessToken())
+                .queryParam("token", authResponse.getAccessToken())
                 .queryParam("refreshToken", authResponse.getRefreshToken())
+                .queryParam("refresh_token", authResponse.getRefreshToken())
                 .queryParam("tokenType", authResponse.getTokenType())
                 .queryParam("expiresIn", authResponse.getExpiresIn())
                 .queryParam("userId", authResponse.getUser().getId())
@@ -79,9 +82,18 @@ public class OAuthController {
         }
         String decoded = URLDecoder.decode(state, StandardCharsets.UTF_8);
 
-        // If state itself is a full URL, use it
-        if (decoded.startsWith("http://") || decoded.startsWith("https://")) {
-            return Optional.of(decoded);
+        // Handle double-encoded state (e.g., %257B -> %7B -> {)
+        if (decoded.contains("%")) {
+            decoded = URLDecoder.decode(decoded, StandardCharsets.UTF_8);
+        }
+
+        // If state is a JSON like {"redirect_url":"..."}
+        if (decoded.contains("\"redirect_url\":\"")) {
+            int start = decoded.indexOf("\"redirect_url\":\"") + 16;
+            int end = decoded.indexOf("\"", start);
+            if (end > start) {
+                return Optional.of(decoded.substring(start, end));
+            }
         }
 
         // If state is a simple query string like redirect_url=...
